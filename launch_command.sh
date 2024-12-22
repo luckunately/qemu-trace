@@ -12,7 +12,7 @@ sudo qemu-system-x86_64 \
   -nographic \
   -drive file=qemu-sda-image.img,media=disk,format=raw \
   -append "console=ttyS0 nokaslr root=/dev/sda rw" \
-  -m 8G \
+  -m 32G \
   --enable-kvm \
   -netdev user,id=net0,hostfwd=tcp::2222-:22 \
   -serial mon:stdio \

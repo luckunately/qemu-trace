@@ -96,6 +96,11 @@ make: *** [Makefile:1161: vmlinux] Error 1
 Try to disable `CONFIG_DEBUG_INFO_BTF` in the `.config` file. And then move on with default options if prompted.
 
 ## setup qemu
-```bash
+
+Now that the kernel is compiled, we can use it to boot a virtual machine using qemu. Start with installing `sudo apt install debootstrap`
+
+Check out `image_create_qemu.sh` script in this repository. This script creates a virtual machine image and installs the necessary packages to boot the virtual machine. Change the size of the image as needed and note how we can adjust the stuff inside the image in current running kernel.
+
+
 
 

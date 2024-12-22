@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMGSIZE=16g
+IMGSIZE=512g
 
 IMGPATH=./qemu-sda-image.img
 MOUNTPATH=./qemu-hd
@@ -23,8 +23,3 @@ sudo chroot $MOUNTPATH apt-get install -y build-essential vim wget curl git gdb
 echo "set root password"
 sudo chroot $MOUNTPATH passwd root
 sudo umount $MOUNTPATH``
-
-
-protect
-[ 2413.826604] "4. PF addr and ip", 7f1e44696000, 401a98
-protect

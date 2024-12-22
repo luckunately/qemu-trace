@@ -1,5 +1,5 @@
-# Create a swap file of 2GB (2048 blocks of 1MB each) filled with zeros
-sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+# Create a swap file of 64GB (65536 blocks of 1MB each) filled with zeros
+sudo dd if=/dev/zero of=/swapfile bs=1M count=65536
 
 # Set the correct permissions for the swap file to be readable and writable only by root
 sudo chmod 600 /swapfile
