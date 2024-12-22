@@ -101,6 +101,82 @@ Now that the kernel is compiled, we can use it to boot a virtual machine using q
 
 Check out `image_create_qemu.sh` script in this repository. This script creates a virtual machine image and installs the necessary packages to boot the virtual machine. Change the size of the image as needed and note how we can adjust the stuff inside the image in current running kernel.
 
+### install `cgroup`
+For some reason, `cgroup` cannot be installed onto the image the easy way with `chroot` then `apt install`. We need to manually download the package and install it. 
+
+`sudo apt download xxx` will download the package. We shall see the `*.deb` file.
+
+We will need:
+1. cgroup-tools
+2. libcgroup1
+3. Possibly `libc6` if it warns about it.
+
+Suggestion: almost all operations require `sudo` so it is better to be in `root` mode. But with **great power comes great responsibility**.
+
+1. Mount the image into the default folder with `mount -o loop qemu-sda-image.img qemu-hd` and copy the debian pakcage into it.
+2. `chroot qemu-hd` and install the packages with `dpkg -i xxx.deb`
+3. Check if `cgexec` works. If not, try to install `libc6` package.
+4. Exit the `chroot` and unmount the image with `umount qemu-hd`. **WARNING**: Do not forget to unmount the image, otherwise, the data will be corrupted if you try to launch the virtual machine.
+
+The above steps can be used to solve other package installation issues (hopefully).
+
+### launch qemu
+Check out `launch_qemu.sh` script in this repository. This script launches the qemu virtual machine with the kernel that was compiled. Change the size of ram and the path to the kernel as needed.
+
+For each launch, just need to type in the password for the `root` user.
+
+#### First time of launching
+
+We need to set up the **swap space**. The script `commands_to_set_up_swap.sh` contains the commands to set up the swap space. Run the commands manually in the virtual machine.
+
+### Running `cgroup` commands
+
+For each launch, we need to create a cgroup with `cgcreate` and then execute the command with `cgexec`. 
+
+An example could be:
+```bash
+sudo cgcreate -g memory:rpe
+echo 56M > /sys/fs/cgroup/rpe/memory.high
+```
+The above commands create a cgroup named `rpe` and set the memory limit to 56MB.
+
+To run an executable in the cgroup, use the following command:
+```bash
+cgexec -g memory:rpe ./the_executable
+```
+
+This shall run the executable in the cgroup `rpe` and the kernel will report the page swapping information.
+
+### Collecting the trace
+
+Since we are using the console to synchronize the info, we need to keep all the console printout. Thus when we launch the qemu, we need to redirect the output to a file. 
+
+```bash
+./launch_qemu.sh > output.log
+```
+
+The `output.log` file will contain all the console printout. Then do the usual login and `cgroup` setup in the same terminal that the qemu is running.
+
+#### Getting executables
+
+You can either compile the executables in the virtual machine or copy the executables from the host machine to the virtual machine.
+
+##### Example and sanity check
+Check out `rand_then_rand.c` and `shuffle.h` from this repository. Try it out and count the number of page faults. It should only get page faults upon swap. **YES, COLD MISSES** are not collected.
+
+#### Processing the trace
+
+`filter_page_faults.py` will filter out the page faults from the `output.log` file. To use it:
+```bash
+python3 filter_page_fault.py <input_file> <output_file>
+```
+
+`mem_to_delta.py` will convert the memory address to the delta of the memory address. To use it:
+```bash
+python3 filter_page_fault.py <input_file> <output_file>
+```
+**TODO: Need to parse `ip` which I did not do yet.**
+
 
 
 
