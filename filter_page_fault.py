@@ -45,7 +45,7 @@ The example input file looks like this:
 with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
     outfile.write("pc,addr\n")
     for line in infile:
-        if "PF addr and pc" in line:
+        if "PF addr and ip" in line:
             parts = line.split(',')
             if len(parts) == 3:
                 address = parts[1].strip()
