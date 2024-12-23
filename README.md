@@ -1,6 +1,29 @@
 # qemu-trace
 
-This is the steps of collecting qemu trace.
+This is the steps of collecting qemu trace. It will catch the `pc/ip` of the instruction that caused the page to be swapped and the address of the page being swapped. It can also print the content of the page being swapped.
+
+## Table of Contents
+
+- [Introduction](#qemu-trace)
+- [Get a Linux Kernel](#get-a-linux-kernel)
+    - [Download the Kernel](#download-the-kernel)
+    - [Configure the Kernel](#configure-the-kernel)
+    - [Install the Required Tools](#install-the-required-tools)
+- [Adjust the Kernel Source Code](#adjust-the-kernel-source-code)
+    - [`memory.c`](#memoryc)
+    - [`internal.h`](#internalh)
+- [Compile the Kernel](#compile-the-kernel)
+    - [Possible Errors 1](#possible-errors-1)
+    - [Possible Errors 2](#possible-errors-2)
+- [Setup QEMU](#setup-qemu)
+    - [Install `cgroup`](#install-cgroup)
+    - [Launch QEMU](#launch-qemu)
+        - [First Time of Launching](#first-time-of-launching)
+        - [Running `cgroup` Commands](#running-cgroup-commands)
+- [Collecting the Trace](#collecting-the-trace)
+    - [Getting Executables](#getting-executables)
+        - [Example and Sanity Check](#example-and-sanity-check)
+    - [Processing the Trace](#processing-the-trace)
 
 ## Get a linux kernel
 
@@ -171,11 +194,16 @@ Check out `rand_then_rand.c` and `shuffle.h` from this repository. Try it out an
 python3 filter_page_fault.py <input_file> <output_file>
 ```
 
+This intermediate output will be a `.csv` file with headers `ip,addr`. The `ip` is the `pc/ip` of the instruction that caused the page to be swapped. The `addr` is the memory address of the page being swapped (The page fault address masked by page offset).
+
 `mem_to_delta.py` will convert the memory address to the delta of the memory address. To use it:
 ```bash
 python3 filter_page_fault.py <input_file> <output_file>
 ```
-**TODO: Need to parse `ip` which I did not do yet.**
+
+The final output will be a `.csv` file with headers `ip,delta_in,delta_out`. The `delta_in` is the delta of the memory address of the page being swapped. The `delta_out` is the delta of the `pc/ip` of the instruction that caused the page to be swapped. Both address is shifted by the page offset thus 1 means off by 1 page (4KB).
+
+TODO: ADD support for page content printing.
 
 
 

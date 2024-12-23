@@ -23,35 +23,31 @@ print(f"Reading input file {input_file}")
 print(f"Writing output file {output_file}")
 
 '''
-[  116.658909] "4. Page fault at address", 7ff06583b000
-[  116.659819] "4. Page fault at address", 7fff8968a000
-[  116.661104] "4. Page fault at address", 55e0c76d3000
-[  116.663539] "4. Page fault at address", 55e0c6434000
-[  116.707381] "4. Page fault at address", 55e0c76d4000
-[  116.743045] "4. Page fault at address", 55e0c76d5000
-[  116.775877] "4. Page fault at address", 55e0c76d6000
-[  116.806779] "4. Page fault at address", 55e0c76d7000
-[  116.833698] "4. Page fault at address", 55e0c76d8000
-[  116.858970] "4. Page fault at address", 55e0c76d9000
-[  116.882494] "4. Page fault at address", 55e0c76da000
-[  116.905252] "4. Page fault at address", 55e0c76db000
-[  116.928025] "4. Page fault at address", 55e0c76dc000
-[  116.950235] "4. Page fault at address", 55e0c76dd000
+The example input file looks like this:
+
+[  103.030429] "4. PF addr and ip", 7f723dc74000, 564e99125b4c
+[  103.036384] "4. PF addr and ip", 7f7240110000, 564e99125b4c
+[  103.039074] "4. PF addr and ip", 7f7240057000, 564e99125b4c
+[  103.040801] "4. PF addr and ip", 7f723ad44000, 564e99125b4c
+[  103.041854] "4. PF addr and ip", 7f723d731000, 564e99125b4c
+[  103.048419] "4. PF addr and ip", 7f723edfa000, 564e99125b4c
+[  103.049278] "4. PF addr and ip", 7f7240bfd000, 564e99125b4c
+[  103.050232] "4. PF addr and ip", 7f723f633000, 564e99125b4c
+[  103.051541] "4. PF addr and ip", 7f7242c76000, 564e991260ce
+[  103.057721] "4. PF addr and ip", 7f7237684000, 564e9912602f
+[  103.059359] "4. PF addr and ip", 7f72409a1000, 564e99125b4c
+[  103.062051] "4. PF addr and ip", 7f723ed53000, 564e99125b4c
+[  103.066602] "4. PF addr and ip", 7f724005a000, 564e99125b4c
+[  103.068920] "4. PF addr and ip", 7f723d72d000, 564e99125b4c
 '''
 
-# read input file, filter out all other lines, only keep the page fault lines, they contain the word "Page fault"
-page_faults = []
-
-with open(input_file, 'r') as file:
-    for line in file:
-        if "Page fault at address" in line:
+# read input file, filter out all other lines, only keep the page fault lines
+with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+    outfile.write("pc,addr\n")
+    for line in infile:
+        if "PF addr and pc" in line:
             parts = line.split(',')
-            if len(parts) == 2:
+            if len(parts) == 3:
                 address = parts[1].strip()
-                page_faults.append(address)
-
-# write the filtered page fault addresses to the output file
-with open(output_file, 'w') as file:
-    file.write("addr\n")
-    for address in page_faults:
-        file.write(f"{address}\n")
+                ip = parts[2].strip()
+                outfile.write(f"{ip},{address}\n")

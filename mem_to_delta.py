@@ -22,8 +22,12 @@ output_file = os.path.abspath(output_file)
 df = pd.read_csv(input_file, nrows = 500_000_000)
 
 addrs = df['addr'].apply(lambda x: int(x, 16) >> 12).tolist()
+ip = df['pc'] # leave this as hex string
+
+assert len(addrs) == len(ip)
+
 with open(output_file, 'w') as f:
-    f.write("delta_in,delta_out\n")
+    f.write("pc,delta_in,delta_out\n")
     
     for i in range(1, len(df) - 1):
         delta_in = addrs[i] - addrs[i-1]
@@ -31,5 +35,5 @@ with open(output_file, 'w') as f:
         # if delta_in == 0:
         #     print(f"Page fault at {i}")
         # assert delta_in != 0 # delta_in should not be 0, no page fault twice in a row
-        f.write(f"{(delta_in)},{(delta_out)}\n")
+        f.write(f"{ip[i]},{(delta_in)},{(delta_out)}\n")
         
