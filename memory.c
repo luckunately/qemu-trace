@@ -98,8 +98,13 @@ struct page *mem_map;
 EXPORT_SYMBOL(mem_map);
 #endif
 
+
+/**
+ * Where I deal with qemu trace collecter symbols and global variables
+ */
 // #define PRINT_PAGE_CONTENT
 #undef PRINT_PAGE_CONTENT
+int qemu_page_count = 0;
 
 /*
  * A number of key systems in x86 including ioremap() rely on the assumption
@@ -3525,7 +3530,7 @@ vm_fault_t do_swap_page_collect(struct vm_fault *vmf, struct pt_regs *regs)
 				__SetPageLocked(page);
 				__SetPageSwapBacked(page);
 
-				printk(KERN_CRIT "\"2. Page fault at address\", %lx\n", vmf->address);
+				// printk(KERN_CRIT "\"2. Page fault at address\", %lx\n", vmf->address);
 
 				if (mem_cgroup_swapin_charge_page(page,
 					vma->vm_mm, GFP_KERNEL, entry)) {
@@ -3687,7 +3692,8 @@ vm_fault_t do_swap_page_collect(struct vm_fault *vmf, struct pt_regs *regs)
 	/* No need to invalidate - it was non-present before */
 	update_mmu_cache(vma, vmf->address, vmf->pte);
 
-	printk(KERN_CRIT "\"4. PF addr and ip\", %lx, %lx\n", vmf->address, regs->ip);
+	printk(KERN_CRIT "\"%d PF addr and ip\", %lx, %lx\n", qemu_page_count, vmf->address, regs->ip);
+	qemu_page_count++;
 
 #ifdef PRINT_PAGE_CONTENT
 	/* Maybe try to print out the page content */
@@ -3787,7 +3793,7 @@ vm_fault_t do_swap_page(struct vm_fault *vmf)
 				__SetPageLocked(page);
 				__SetPageSwapBacked(page);
 
-				printk(KERN_CRIT "\"2. Page fault at address\", %lx\n", vmf->address);
+				// printk(KERN_CRIT "\"2. Page fault at address\", %lx\n", vmf->address);
 
 				if (mem_cgroup_swapin_charge_page(page,
 					vma->vm_mm, GFP_KERNEL, entry)) {

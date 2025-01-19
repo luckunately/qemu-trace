@@ -37,3 +37,5 @@ with open(output_file, 'w') as f:
         # assert delta_in != 0 # delta_in should not be 0, no page fault twice in a row
         f.write(f"{ip[i]},{(delta_in)},{(delta_out)}\n")
         
+        
+        
