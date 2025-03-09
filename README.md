@@ -45,7 +45,7 @@ cp -v /boot/config-$(uname -r) .config
 
 ### Install the required tools
 ```bash
-sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev
+sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev zstd
 ```
 
 ## Adjust the kernel source code
