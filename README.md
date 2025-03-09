@@ -144,7 +144,7 @@ Suggestion: almost all operations require `sudo` so it is better to be in `root`
 The above steps can be used to solve other package installation issues (hopefully).
 
 ### launch qemu
-Check out `launch_qemu.sh` script in this repository. This script launches the qemu virtual machine with the kernel that was compiled. Change the size of ram and the path to the kernel as needed.
+Check out `launch_command.sh` script in this repository. This script launches the qemu virtual machine with the kernel that was compiled. Change the size of ram and the path to the kernel as needed.
 
 For each launch, just need to type in the password for the `root` user.
 
