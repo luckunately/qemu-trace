@@ -175,10 +175,10 @@ This shall run the executable in the cgroup `rpe` and the kernel will report the
 Since we are using the console to synchronize the info, we need to keep all the console printout. Thus when we launch the qemu, we need to redirect the output to a file. 
 
 ```bash
-./launch_qemu.sh > output.log
+./launch_command.sh
 ```
 
-The `output.log` file will contain all the console printout. Then do the usual login and `cgroup` setup in the same terminal that the qemu is running.
+The `qemu.log` file will contain all the console printout. Then do the usual login and `cgroup` setup in the same terminal that the qemu is running.
 
 #### Getting executables
 
