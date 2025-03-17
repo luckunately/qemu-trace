@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMGSIZE=512g
+IMGSIZE=100g
 
 IMGPATH=./qemu-sda-image.img
 MOUNTPATH=./qemu-hd

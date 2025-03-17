@@ -45,7 +45,7 @@ cp -v /boot/config-$(uname -r) .config
 
 ### Install the required tools
 ```bash
-sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev
+sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev zstd
 ```
 
 ## Adjust the kernel source code
@@ -144,7 +144,7 @@ Suggestion: almost all operations require `sudo` so it is better to be in `root`
 The above steps can be used to solve other package installation issues (hopefully).
 
 ### launch qemu
-Check out `launch_qemu.sh` script in this repository. This script launches the qemu virtual machine with the kernel that was compiled. Change the size of ram and the path to the kernel as needed.
+Check out `launch_command.sh` script in this repository. This script launches the qemu virtual machine with the kernel that was compiled. Change the size of ram and the path to the kernel as needed.
 
 For each launch, just need to type in the password for the `root` user.
 
@@ -175,10 +175,10 @@ This shall run the executable in the cgroup `rpe` and the kernel will report the
 Since we are using the console to synchronize the info, we need to keep all the console printout. Thus when we launch the qemu, we need to redirect the output to a file. 
 
 ```bash
-./launch_qemu.sh > output.log
+./launch_command.sh
 ```
 
-The `output.log` file will contain all the console printout. Then do the usual login and `cgroup` setup in the same terminal that the qemu is running.
+The `qemu.log` file will contain all the console printout. Then do the usual login and `cgroup` setup in the same terminal that the qemu is running.
 
 #### Getting executables
 
@@ -205,6 +205,95 @@ The final output will be a `.csv` file with headers `ip,delta_in,delta_out`. The
 
 TODO: ADD support for page content printing.
 
+### QEMU Network Connectivity
 
+This short guide provides steps to ensure that a QEMU guest operating system can successfully connect to a network. It covers building the correct network drivers into the kernel, bringing up the interface, acquiring an IP address, and configuring DNS.
 
+#### Setup
+
+**In your kernel source directory, run:**
+
+```
+make menuconfig
+```
+
+**Navigate to:**
+
+```
+Device Drivers
+  -> Network device support
+    -> Ethernet driver support
+      -> Intel devices
+```
+
+**Change the desired Intel network driver (e.g., `e1000`) from **M** (module) to **[\*]** (built-in).**
+
+```
+Note: Using built-in instead of a module ensures the network driver is available at boot.
+```
+
+**Save the configuration, exit, and recompile your kernel**
+
+#### Verify Network Interface Inside the Guest
+
+1. Once the guest is up, log in as `root` (or another user with privileges).
+
+2. Check the network interfaces:
+
+   ```
+   ip addr show
+   ```
+
+   You should see an interface named something like 
+
+   ```
+   root@qemu:~# ip addr show
+   1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+       link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       inet 127.0.0.1/8 scope host lo
+          valid_lft forever preferred_lft forever
+       inet6 ::1/128 scope host 
+          valid_lft forever preferred_lft forever
+   2: ens3: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+       link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+       altname enp0s3
+   ```
+
+#### Bring Up and Configure the Interface
+
+If the network interface is down, bring it up manually:
+
+```
+ip link set ens3 up
+```
+
+Then, use DHCP to get an IP address automatically:
+
+```
+dhclient ens3
+```
+
+or
+
+```
+dhcpcd ens3
+```
+
+*(This step depends on which DHCP client is installed; pick the one available in your guest.)*
+
+#### Configure DNS
+
+If DNS is not automatically configured, specify a nameserver. For example, Google’s DNS:
+
+```
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+```
+
+#### Test Connectivity
+
+Once your interface has an IP address and DNS is configured, try:
+
+```
+ping -c 4 8.8.8.8
+```
 
