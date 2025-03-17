@@ -205,6 +205,95 @@ The final output will be a `.csv` file with headers `ip,delta_in,delta_out`. The
 
 TODO: ADD support for page content printing.
 
+### QEMU Network Connectivity
 
+This short guide provides steps to ensure that a QEMU guest operating system can successfully connect to a network. It covers building the correct network drivers into the kernel, bringing up the interface, acquiring an IP address, and configuring DNS.
 
+#### Setup
+
+**In your kernel source directory, run:**
+
+```
+make menuconfig
+```
+
+**Navigate to:**
+
+```
+Device Drivers
+  -> Network device support
+    -> Ethernet driver support
+      -> Intel devices
+```
+
+**Change the desired Intel network driver (e.g., `e1000`) from **M** (module) to **[\*]** (built-in).**
+
+```
+Note: Using built-in instead of a module ensures the network driver is available at boot.
+```
+
+**Save the configuration, exit, and recompile your kernel**
+
+#### Verify Network Interface Inside the Guest
+
+1. Once the guest is up, log in as `root` (or another user with privileges).
+
+2. Check the network interfaces:
+
+   ```
+   ip addr show
+   ```
+
+   You should see an interface named something like 
+
+   ```
+   root@qemu:~# ip addr show
+   1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+       link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       inet 127.0.0.1/8 scope host lo
+          valid_lft forever preferred_lft forever
+       inet6 ::1/128 scope host 
+          valid_lft forever preferred_lft forever
+   2: ens3: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+       link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+       altname enp0s3
+   ```
+
+#### Bring Up and Configure the Interface
+
+If the network interface is down, bring it up manually:
+
+```
+ip link set ens3 up
+```
+
+Then, use DHCP to get an IP address automatically:
+
+```
+dhclient ens3
+```
+
+or
+
+```
+dhcpcd ens3
+```
+
+*(This step depends on which DHCP client is installed; pick the one available in your guest.)*
+
+#### Configure DNS
+
+If DNS is not automatically configured, specify a nameserver. For example, Google’s DNS:
+
+```
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+```
+
+#### Test Connectivity
+
+Once your interface has an IP address and DNS is configured, try:
+
+```
+ping -c 4 8.8.8.8
+```
 
